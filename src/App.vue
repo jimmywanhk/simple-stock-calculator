@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div class="container mt-4">
-      <h1 class="text-center mb-4">Stock Profit/Loss Calculator</h1>
+      <h4 class="text-center mb-4">Stock Profit/Loss Calculator</h4>
       
       <div class="row mb-3">
         <div class="col-12">
@@ -11,83 +11,26 @@
         </div>
       </div>
 
-      <div class="table-responsive">
-        <table class="table table-striped table-hover">
-          <thead class="table-dark">
-            <tr>
-              <th>Ticker Symbol</th>
-              <th>Buy Price ($)</th>
-              <th>Sell Price ($)</th>
-              <th>Quantity</th>
-              <th>Profit/Loss ($)</th>
-              <th>Profit/Loss (%)</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(stock, index) in stocks" :key="index">
-              <td>
-                <input 
-                  v-model="stock.ticker"
-                  @input="saveToLocalStorage"
-                  type="text" 
-                  class="form-control"
-                  placeholder="AAPL"
-                />
-              </td>
-              <td>
-                <input 
-                  v-model.number="stock.buyPrice"
-                  @input="saveToLocalStorage"
-                  type="number" 
-                  step="0.01"
-                  min="0"
-                  class="form-control"
-                  placeholder="0.00"
-                />
-              </td>
-              <td>
-                <input 
-                  v-model.number="stock.sellPrice"
-                  @input="saveToLocalStorage"
-                  type="number" 
-                  step="0.01"
-                  min="0"
-                  class="form-control"
-                  placeholder="0.00"
-                />
-              </td>
-              <td>
-                <input 
-                  v-model.number="stock.quantity"
-                  @input="saveToLocalStorage"
-                  type="number" 
-                  min="1"
-                  class="form-control"
-                  placeholder="100"
-                />
-              </td>
-              <td>
-                <span :class="getProfitLossClass(calculateProfitLoss(stock))">
-                  ${{ calculateProfitLoss(stock).toFixed(2) }}
-                </span>
-              </td>
-              <td>
-                <span :class="getProfitLossClass(calculateProfitLoss(stock))">
-                  {{ calculateProfitLossPercentage(stock).toFixed(2) }}%
-                </span>
-              </td>
-              <td>
-                <button 
-                  @click="deleteRow(index)"
-                  class="btn btn-danger btn-sm"
-                >
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="grid-container">
+        <!-- Header -->
+        <div class="grid-header">
+          <div class="grid-cell header-cell">Ticker</div>
+          <div class="grid-cell header-cell">Buy ($)</div>
+          <div class="grid-cell header-cell">Sell ($)</div>
+          <div class="grid-cell header-cell">Quantity</div>
+          <div class="grid-cell header-cell">P/L ($)</div>
+          <div class="grid-cell header-cell">P/L (%)</div>
+          <div class="grid-cell header-cell"></div>
+        </div>
+
+        <!-- Data Rows -->
+        <DataRow
+          v-for="(stock, index) in stocks"
+          :key="index"
+          :stock="stock"
+          @update="updateStock(index, $event)"
+          @delete="deleteRow(index)"
+        />
       </div>
 
       <div v-if="stocks.length === 0" class="text-center text-muted mt-5">
@@ -95,31 +38,18 @@
         <p class="mt-3">No stocks added yet. Click "Add Stock" to get started!</p>
       </div>
 
-      <div v-if="stocks.length > 0" class="mt-4">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Portfolio Summary</h5>
-            <div class="row">
-              <div class="col-md-4">
-                <strong>Total Profit/Loss:</strong> 
-                <span :class="getProfitLossClass(totalProfitLoss)">
-                  ${{ totalProfitLoss.toFixed(2) }}
-                </span>
-              </div>
-              <div class="col-md-4">
-                <strong>Number of Stocks:</strong> {{ stocks.length }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
+import DataRow from './components/DataRow.vue'
+
 export default {
   name: 'App',
+  components: {
+    DataRow
+  },
   data() {
     return {
       stocks: []
@@ -128,7 +58,10 @@ export default {
   computed: {
     totalProfitLoss() {
       return this.stocks.reduce((total, stock) => {
-        return total + this.calculateProfitLoss(stock);
+        if (!stock.buyPrice || !stock.sellPrice || !stock.quantity) {
+          return total;
+        }
+        return total + ((stock.sellPrice - stock.buyPrice) * stock.quantity);
       }, 0);
     }
   },
@@ -146,22 +79,9 @@ export default {
       this.stocks.splice(index, 1);
       this.saveToLocalStorage();
     },
-    calculateProfitLoss(stock) {
-      if (!stock.buyPrice || !stock.sellPrice || !stock.quantity) {
-        return 0;
-      }
-      return (stock.sellPrice - stock.buyPrice) * stock.quantity;
-    },
-    calculateProfitLossPercentage(stock) {
-      if (!stock.buyPrice || !stock.sellPrice) {
-        return 0;
-      }
-      return ((stock.sellPrice - stock.buyPrice) / stock.buyPrice) * 100;
-    },
-    getProfitLossClass(value) {
-      if (value > 0) return 'text-success fw-bold';
-      if (value < 0) return 'text-danger fw-bold';
-      return 'text-muted';
+    updateStock(index, { field, value }) {
+      this.stocks[index][field] = value;
+      this.saveToLocalStorage();
     },
     saveToLocalStorage() {
       localStorage.setItem('stockData', JSON.stringify(this.stocks));
@@ -179,17 +99,119 @@ export default {
 }
 </script>
 
-<style>
-.form-control:focus {
+<style scoped>
+.grid-container {
+  display: grid;
+  grid-template-columns: 0.75fr 1fr 1fr 1fr 1fr 1fr auto;
+  gap: 1px;
+  background-color: #dee2e6;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.grid-header {
+  display: contents;
+}
+
+:deep(.grid-row) {
+  display: contents;
+}
+
+:deep(.grid-cell) {
+  background-color: white;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.header-cell {
+  background-color: #212529;
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  justify-content: center;
+}
+
+:deep(.grid-row:nth-child(even) .grid-cell) {
+  background-color: #f8f9fa;
+}
+
+:deep(.grid-row:hover .grid-cell) {
+  background-color: #e9ecef;
+}
+
+:deep(.form-control:focus) {
   border-color: #0d6efd;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
-.table td {
-  vertical-align: middle;
+:deep(input[type="number"]) {
+  text-align: right;
 }
 
-input[type="number"] {
-  text-align: right;
+html {
+  overflow-y: scroll;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .grid-container {
+    display: block;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+  }
+  
+  .grid-header {
+    display: none;
+  }
+  
+  :deep(.grid-row) {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: white;
+    overflow: hidden;
+  }
+  
+  :deep(.grid-row:nth-child(even)) {
+    background-color: white;
+  }
+  
+  :deep(.grid-cell) {
+    display: flex;
+    padding: 0.75rem;
+    border-bottom: 1px solid #f1f3f4;
+    background-color: inherit;
+    align-items: center;
+  }
+  
+  :deep(.grid-cell:last-child) {
+    border-bottom: none;
+    justify-content: center;
+  }
+  
+  :deep(.grid-cell::before) {
+    content: attr(data-label);
+    font-weight: 600;
+    margin-right: 0.75rem;
+    color: #495057;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+  
+  :deep(.grid-cell[data-label=""]) {
+    justify-content: center;
+  }
+  
+  :deep(.grid-cell[data-label=""]::before) {
+    display: none;
+  }
+  
+  :deep(.form-control) {
+    flex: 1;
+  }
 }
 </style>
