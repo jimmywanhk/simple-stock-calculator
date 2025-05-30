@@ -60,11 +60,9 @@
     <div class="grid-cell" data-label="">
       <button 
         @click="$emit('delete')"
-        class="btn btn-circle"
-        type="button"
-        title="Delete stock"
+        class="btn btn-danger btn-sm"
       >
-        ×
+        <i class="bi bi-x-lg"></i>
       </button>
     </div>
   </div>
