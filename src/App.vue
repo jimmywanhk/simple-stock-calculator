@@ -133,10 +133,6 @@ export default {
   justify-content: center;
 }
 
-:deep(.grid-row:nth-child(even) .grid-cell) {
-  background-color: #f8f9fa;
-}
-
 :deep(.grid-row:hover .grid-cell) {
   background-color: #e9ecef;
 }
@@ -164,46 +160,47 @@ html {
   }
   
   :deep(.grid-row) {
+    position: relative;
     display: block;
     margin-bottom: 1rem;
     border: 1px solid #dee2e6;
     border-radius: 0.375rem;
-    background-color: white;
+    background-color: #f8f9fa;
     overflow: hidden;
-  }
-  
-  :deep(.grid-row:nth-child(even)) {
-    background-color: white;
+    padding-top: 3rem; /* Space for delete button */
   }
   
   :deep(.grid-cell) {
     display: flex;
-    padding: 0.25rem;
+    padding: 0.5rem;
     border-bottom: 1px solid #f1f3f4;
     background-color: inherit;
     align-items: center;
   }
   
+  /* Delete button positioned at top right */
   :deep(.grid-cell:last-child) {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
     border-bottom: none;
-    justify-content: center;
+    padding: 0;
+    background-color: transparent;
   }
   
-  :deep(.grid-cell::before) {
+  /* Hide delete button label and styling */
+  :deep(.grid-cell:last-child::before) {
+    display: none;
+  }
+  
+  /* Other cells get labels */
+  :deep(.grid-cell:not(:last-child)::before) {
     content: attr(data-label);
     font-weight: 600;
     margin-right: 0.75rem;
     color: #495057;
     min-width: 80px;
     flex-shrink: 0;
-  }
-  
-  :deep(.grid-cell[data-label=""]) {
-    justify-content: center;
-  }
-  
-  :deep(.grid-cell[data-label=""]::before) {
-    display: none;
   }
   
   :deep(.form-control) {
