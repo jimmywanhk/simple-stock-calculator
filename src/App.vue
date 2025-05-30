@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div class="container mt-4">
-      <h4 class="text-center mb-4">Stock Profit/Loss Calculator -- Test CD</h4>
+      <h4 class="text-center mb-4">Stock Profit/Loss Calculator</h4>
       
       <div class="row mb-3">
         <div class="col-12">
