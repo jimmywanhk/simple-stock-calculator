@@ -120,7 +120,7 @@ export default {
 
 :deep(.grid-cell) {
   background-color: white;
-  padding: 0.5rem;
+  padding: 0.25rem;
   display: flex;
   align-items: center;
 }
@@ -144,10 +144,6 @@ export default {
 :deep(.form-control:focus) {
   border-color: #0d6efd;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-:deep(input[type="number"]) {
-  text-align: right;
 }
 
 html {
@@ -182,7 +178,7 @@ html {
   
   :deep(.grid-cell) {
     display: flex;
-    padding: 0.75rem;
+    padding: 0.25rem;
     border-bottom: 1px solid #f1f3f4;
     background-color: inherit;
     align-items: center;
