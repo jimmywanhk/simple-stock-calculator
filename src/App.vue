@@ -71,7 +71,7 @@ export default {
         ticker: '',
         buyPrice: 0,
         sellPrice: 0,
-        quantity: 0
+        quantity: 1
       });
       this.saveToLocalStorage();
     },
