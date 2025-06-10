@@ -134,11 +134,11 @@
                         <span class="input-group-text">HK$</span>
                         <input 
                           id="accountSize"
-                          v-model.number="positionSizer.accountSize"
-                          @input="savePositionSizerToStorage"
-                          type="number" 
-                          step="1000"
-                          min="0"
+                          :value="formatAccountSizeInput"
+                          @input="updateAccountSize"
+                          @focus="handleAccountSizeFocus"
+                          @blur="handleAccountSizeBlur"
+                          type="text"
                           class="form-control"
                           placeholder="100,000"
                         />
@@ -211,7 +211,8 @@ export default {
         maxDrawdown: 0.5,
         stopLoss: 3.0,
         accountSize: 100000
-      }
+      },
+      isAccountSizeFocused: false
     }
   },
   computed: {
@@ -231,6 +232,13 @@ export default {
     },
     recommendedPositionUSD() {
       return this.recommendedPositionHKD / this.exchangeRate;
+    },
+    formatAccountSizeInput() {
+      // Show formatted number when not focused, raw number when focused
+      if (this.isAccountSizeFocused) {
+        return this.positionSizer.accountSize.toString();
+      }
+      return this.formatNumber(this.positionSizer.accountSize);
     }
   },
   methods: {
@@ -250,6 +258,20 @@ export default {
     updateStock(index, { field, value }) {
       this.stocks[index][field] = value;
       this.saveToLocalStorage();
+    },
+    updateAccountSize(event) {
+      // Remove commas and convert to number
+      const value = event.target.value.replace(/,/g, '');
+      const numericValue = parseFloat(value) || 0;
+      
+      this.positionSizer.accountSize = numericValue;
+      this.savePositionSizerToStorage();
+    },
+    handleAccountSizeFocus() {
+      this.isAccountSizeFocused = true;
+    },
+    handleAccountSizeBlur() {
+      this.isAccountSizeFocused = false;
     },
     formatCurrency(value) {
       const absValue = Math.abs(value).toFixed(2);
